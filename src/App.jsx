@@ -34,12 +34,26 @@ function App() {
   const [isCaptured, setIsCaptured] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('ascii-theme') || 'dark';
+  });
+
+  // Apply theme to document
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('ascii-theme', theme);
+  }, [theme]);
+
+  const toggleTheme = useCallback(() => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  }, []);
 
   const imageRef = useRef(null);
   const fileInputRef = useRef(null);
   const canvasComponentRef = useRef(null);
 
   // ── ASCII Renderer Hook ──
+  const canvasBg = theme === 'dark' ? '#0a0a0a' : '#ffffff';
   const renderer = useAsciiRenderer({
     charset: settings.charset,
     colorMode: settings.colorMode,
@@ -51,6 +65,7 @@ function App() {
     invert: settings.invert,
     edgeDetect: settings.edgeDetect,
     performanceMode: settings.performanceMode,
+    canvasBg,
   });
 
   // Set initial font size based on device
@@ -175,7 +190,7 @@ function App() {
 
   // ── RENDER ──
   return (
-    <div className="app" id="app">
+    <div className="app" id="app" data-theme={theme}>
       {/* ── Splash Screen ── */}
       {showSplash && (
         <div className={`splash ${!showSplash ? 'fade-out' : ''}`} id="splash-screen">
@@ -226,6 +241,26 @@ function App() {
         </div>
 
         <div className="top-bar-right">
+          {/* Theme Toggle */}
+          <button className="theme-toggle" onClick={toggleTheme} id="btn-theme" aria-label="Toggle theme">
+            {theme === 'dark' ? (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="5" />
+                <line x1="12" y1="1" x2="12" y2="3" />
+                <line x1="12" y1="21" x2="12" y2="23" />
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                <line x1="1" y1="12" x2="3" y2="12" />
+                <line x1="21" y1="12" x2="23" y2="12" />
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+              </svg>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg>
+            )}
+          </button>
           {/* Export Button */}
           <div className="export-wrap">
             <button
@@ -243,21 +278,48 @@ function App() {
             </button>
 
             {showExportMenu && (
-              <div className="export-menu glass" id="export-menu">
+              <div className="export-menu" id="export-menu">
                 <div className="export-group-label">Image</div>
                 <button onClick={() => handleExport('png')} id="export-png">
-                  <span className="export-icon">🖼️</span>PNG <span className="export-hint">Lossless</span>
+                  <span className="export-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                      <circle cx="8.5" cy="8.5" r="1.5" />
+                      <polyline points="21 15 16 10 5 21" />
+                    </svg>
+                  </span>
+                  PNG <span className="export-hint">Lossless</span>
                 </button>
                 <button onClick={() => handleExport('jpg')} id="export-jpg">
-                  <span className="export-icon">📷</span>JPG <span className="export-hint">Smaller file</span>
+                  <span className="export-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                      <circle cx="12" cy="13" r="4" />
+                    </svg>
+                  </span>
+                  JPG <span className="export-hint">Smaller</span>
                 </button>
                 <div className="export-divider" />
                 <div className="export-group-label">Text</div>
                 <button onClick={() => handleExport('txt')} id="export-txt">
-                  <span className="export-icon">📄</span>Plain Text
+                  <span className="export-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <polyline points="14 2 14 8 20 8" />
+                      <line x1="16" y1="13" x2="8" y2="13" />
+                      <line x1="16" y1="17" x2="8" y2="17" />
+                    </svg>
+                  </span>
+                  Plain Text
                 </button>
                 <button onClick={() => handleExport('html')} id="export-html">
-                  <span className="export-icon">🌐</span>Colored HTML
+                  <span className="export-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="16 18 22 12 16 6" />
+                      <polyline points="8 6 2 12 8 18" />
+                    </svg>
+                  </span>
+                  Colored HTML
                 </button>
               </div>
             )}

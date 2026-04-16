@@ -18,6 +18,7 @@ export function useAsciiRenderer({
   invert,
   edgeDetect,
   performanceMode,
+  canvasBg = '#0a0a0a',
 }) {
   const canvasRef = useRef(null);
   const offscreenCanvasRef = useRef(null);
@@ -103,7 +104,7 @@ export function useAsciiRenderer({
     lastGridRef.current = grid;
 
     // Clear canvas
-    ctx.fillStyle = '#0a0a0f';
+    ctx.fillStyle = canvasBg;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Render ASCII characters
@@ -135,7 +136,7 @@ export function useAsciiRenderer({
     }
 
     return grid;
-  }, [charset, colorMode, monoColor, gradientStops, brightness, contrast, fontSize, invert, edgeDetect]);
+  }, [charset, colorMode, monoColor, gradientStops, brightness, contrast, fontSize, invert, edgeDetect, canvasBg]);
 
   /**
    * Start continuous rendering loop for camera mode

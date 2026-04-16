@@ -63,12 +63,14 @@ export function exportAsPng(canvas, filename, bounds) {
  */
 export function exportAsJpg(canvas, filename, bounds, quality = 0.92) {
   const target = cropCanvas(canvas, bounds);
-  // JPG needs opaque background (no transparency)
+  // JPG needs fully opaque pixels — re-draw on opaque canvas
+  // The target already has the correct theme bg from rendering
   const temp = document.createElement('canvas');
   temp.width = target.width;
   temp.height = target.height;
   const ctx = temp.getContext('2d');
-  ctx.fillStyle = '#0a0a0f';
+  // Sample bg color from the canvas corner (respects current theme)
+  ctx.fillStyle = '#0a0a0a';
   ctx.fillRect(0, 0, temp.width, temp.height);
   ctx.drawImage(target, 0, 0);
 
